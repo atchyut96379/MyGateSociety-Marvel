@@ -166,6 +166,8 @@ Use the result like this:
   only if TCP/IP is enabled on port 1433.
 - If `instance_name` is `SQLEXPRESS` or another value, use `DB_HOST=localhost` and
   `DB_INSTANCE=<that instance_name>`.
+- If `server_name` is `ATCHYUT2026\ATCHYUT3446`, split it into `DB_HOST=ATCHYUT2026` and
+  `DB_INSTANCE=ATCHYUT3446`.
 - If SSMS connects with a server name like `(localdb)\MSSQLLocalDB`, use `DB_HOST=(localdb)` and
   `DB_INSTANCE=MSSQLLocalDB`.
 
@@ -189,6 +191,20 @@ If the password contains `#` or other special characters, quote it:
 
 ```env
 DB_PASSWORD="YourSqlPassword"
+```
+
+For the SSMS result `server_name=ATCHYUT2026\ATCHYUT3446` and `instance_name=ATCHYUT3446`, use:
+
+```env
+DB_HOST=ATCHYUT2026
+DB_INSTANCE=ATCHYUT3446
+DB_NAME=MyGateSociety
+DB_AUTHENTICATION=sql
+DB_USER=sa
+DB_PASSWORD="YourSqlPassword"
+DB_DRIVER=ODBC Driver 18 for SQL Server
+DB_TRUST_SERVER_CERTIFICATE=yes
+AUTO_CREATE_TABLES=false
 ```
 
 For a local named instance like `localhost\SQLEXPRESS` using Windows Authentication:
