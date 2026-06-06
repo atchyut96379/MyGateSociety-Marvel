@@ -124,12 +124,56 @@ Or provide components:
 ```env
 DB_HOST=localhost
 DB_PORT=1433
+DB_INSTANCE=
 DB_NAME=MyGateSociety
+DB_AUTHENTICATION=sql
 DB_USER=sa
 DB_PASSWORD=YourStrong!Passw0rd
 DB_DRIVER=ODBC Driver 18 for SQL Server
 DB_TRUST_SERVER_CERTIFICATE=yes
 ```
+
+### Use your local SQL Server from SSMS
+
+SSMS is the client application. The API connects to the same SQL Server server name and authentication
+that you use on the SSMS login screen.
+
+1. Open SSMS and note the **Server name** and **Authentication** values.
+2. Create the application database if it does not exist:
+
+   ```sql
+   CREATE DATABASE MyGateSociety;
+   ```
+
+3. Make sure Microsoft ODBC Driver 18 for SQL Server is installed on Windows. If you have Driver 17
+   instead, set `DB_DRIVER=ODBC Driver 17 for SQL Server` in `.env`.
+
+For a normal local default instance with SQL Server Authentication:
+
+```env
+DB_HOST=localhost
+DB_PORT=1433
+DB_NAME=MyGateSociety
+DB_AUTHENTICATION=sql
+DB_USER=sa
+DB_PASSWORD=YourSqlPassword
+DB_DRIVER=ODBC Driver 18 for SQL Server
+DB_TRUST_SERVER_CERTIFICATE=yes
+```
+
+For a local named instance like `localhost\SQLEXPRESS` using Windows Authentication:
+
+```env
+DB_HOST=localhost
+DB_INSTANCE=SQLEXPRESS
+DB_NAME=MyGateSociety
+DB_AUTHENTICATION=windows
+DB_DRIVER=ODBC Driver 18 for SQL Server
+DB_TRUST_SERVER_CERTIFICATE=yes
+```
+
+When `DB_AUTHENTICATION=windows`, `DB_USER` and `DB_PASSWORD` are ignored. When `DB_INSTANCE` is set,
+`DB_PORT` is ignored.
 
 ## Common API flow
 
