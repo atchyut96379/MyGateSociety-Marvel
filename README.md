@@ -99,6 +99,19 @@ uvicorn app.main:app --reload
 Then open the web UI at <http://localhost:8000/ui>. Swagger remains available at
 <http://localhost:8000/docs>.
 
+## Web UI workflow
+
+The web UI starts with one login screen for all roles:
+
+- Admin demo login: username `Admin`, password `Admin`
+- Resident demo login: use a resident mobile number already created in the system and any non-empty password
+- Guard demo login: use a guard mobile number already created in the system and any non-empty password
+
+After Admin login, the UI shows an apartment-management dashboard with a dark sidebar, resident/flat
+counts, payment-style summary cards, committee table, visitor/security status, setup records,
+deliveries, and complaints. This is the first UI workflow layer over the API; production-grade
+password reset and role permissions should be added when the authentication workflow is finalized.
+
 For a quick local smoke test without SQL Server, use SQLite:
 
 ```cmd

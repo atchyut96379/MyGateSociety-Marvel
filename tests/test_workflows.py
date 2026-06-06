@@ -119,7 +119,7 @@ def test_ui_is_served(client: TestClient):
 
     ui_response = client.get("/ui/")
     assert ui_response.status_code == 200
-    assert "MyGate Society" in ui_response.text
+    assert "Apartment Management" in ui_response.text
 
 
 def test_manual_visitor_requires_resident_decision(client: TestClient):
