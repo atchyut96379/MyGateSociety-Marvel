@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
+import logging
 import secrets
 
 from fastapi import Depends, FastAPI, HTTPException, Query, status
@@ -33,6 +34,9 @@ from app.schemas import (
     VisitRead,
     VisitorCreate,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 def now_utc() -> datetime:
@@ -137,6 +141,7 @@ def create_app(init_database: bool | None = None) -> FastAPI:
         try:
             db.execute(text("SELECT 1"))
         except Exception as exc:
+            logger.exception("Database health check failed.")
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Database unavailable.") from exc
         return {"status": "ok", "database": "ok"}
 

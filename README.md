@@ -164,6 +164,12 @@ DB_TRUST_SERVER_CERTIFICATE=yes
 For your local SQL Server Authentication setup, keep `DB_USER=sa` and put your local `sa` password in
 `DB_PASSWORD` inside `.env`. Do not commit `.env`; it is intentionally ignored by Git.
 
+If the password contains `#` or other special characters, quote it:
+
+```env
+DB_PASSWORD="YourSqlPassword"
+```
+
 For a local named instance like `localhost\SQLEXPRESS` using Windows Authentication:
 
 ```env
@@ -215,6 +221,36 @@ You have two options:
 
    After running the script manually, you can set `AUTO_CREATE_TABLES=false` if you want the API to
    skip schema creation on startup.
+
+### Troubleshoot `{"detail":"Database unavailable."}`
+
+The API is running, but it cannot connect to SQL Server. Run this command from the activated virtual
+environment to see the real ODBC/SQL Server error:
+
+```cmd
+python scripts\check_db.py
+```
+
+Common fixes:
+
+- Make sure the SQL Server service is running.
+- Use the same server name that works in SSMS:
+  - SSMS `localhost` or `.`: use `DB_HOST=localhost` and `DB_PORT=1433`.
+  - SSMS `localhost\SQLEXPRESS` or `.\SQLEXPRESS`: use `DB_HOST=localhost` and `DB_INSTANCE=SQLEXPRESS`.
+- Confirm the installed ODBC driver:
+
+  ```cmd
+  py -c "import pyodbc; print(pyodbc.drivers())"
+  ```
+
+  If the output has `ODBC Driver 17 for SQL Server` but not Driver 18, set:
+
+  ```env
+  DB_DRIVER=ODBC Driver 17 for SQL Server
+  ```
+
+- If using `DB_PORT=1433`, enable TCP/IP in SQL Server Configuration Manager and restart SQL Server.
+- Confirm SQL Server Authentication is enabled and the `sa` login is enabled.
 
 ## Common API flow
 
