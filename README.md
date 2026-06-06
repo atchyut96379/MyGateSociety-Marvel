@@ -30,10 +30,30 @@ A deployable MyGate-style society management API built with Python, FastAPI, SQL
    cp .env.example .env
    ```
 
+   On Windows Command Prompt, use:
+
+   ```cmd
+   copy .env.example .env
+   ```
+
+   On Windows PowerShell, use:
+
+   ```powershell
+   Copy-Item .env.example .env
+   ```
+
 2. Start the API and SQL Server:
 
    ```bash
    docker compose up --build
+   ```
+
+   If Docker reports that it cannot connect to `dockerDesktopLinuxEngine`, open Docker Desktop and wait
+   until it says the engine is running. You can confirm Docker is ready with:
+
+   ```cmd
+   docker version
+   docker info
    ```
 
 3. Open the API documentation:
@@ -53,9 +73,41 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
+On Windows Command Prompt:
+
+```cmd
+py -3 -m venv .venv
+.venv\Scripts\activate
+pip install -e ".[dev]"
+```
+
+On Windows PowerShell:
+
+```powershell
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -e ".[dev]"
+```
+
 Point the app at SQL Server using either `DATABASE_URL` or the `DB_*` variables in `.env`, then run:
 
 ```bash
+uvicorn app.main:app --reload
+```
+
+For a quick local smoke test without SQL Server, use SQLite:
+
+```cmd
+set DATABASE_URL=sqlite+pysqlite:///./local-dev.db
+set AUTO_CREATE_TABLES=true
+uvicorn app.main:app --reload
+```
+
+PowerShell equivalent:
+
+```powershell
+$env:DATABASE_URL = "sqlite+pysqlite:///./local-dev.db"
+$env:AUTO_CREATE_TABLES = "true"
 uvicorn app.main:app --reload
 ```
 
