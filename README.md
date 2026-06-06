@@ -161,6 +161,9 @@ DB_DRIVER=ODBC Driver 18 for SQL Server
 DB_TRUST_SERVER_CERTIFICATE=yes
 ```
 
+For your local SQL Server Authentication setup, keep `DB_USER=sa` and put your local `sa` password in
+`DB_PASSWORD` inside `.env`. Do not commit `.env`; it is intentionally ignored by Git.
+
 For a local named instance like `localhost\SQLEXPRESS` using Windows Authentication:
 
 ```env
@@ -174,6 +177,44 @@ DB_TRUST_SERVER_CERTIFICATE=yes
 
 When `DB_AUTHENTICATION=windows`, `DB_USER` and `DB_PASSWORD` are ignored. When `DB_INSTANCE` is set,
 `DB_PORT` is ignored.
+
+### Create SQL Server tables
+
+You have two options:
+
+1. Automatic table creation from the API.
+
+   Keep this value in `.env`:
+
+   ```env
+   AUTO_CREATE_TABLES=true
+   ```
+
+   Then start the API:
+
+   ```cmd
+   uvicorn app.main:app --reload
+   ```
+
+   On startup, the API creates the required tables if they do not already exist.
+
+2. Manual table creation from SSMS.
+
+   Open `scripts/create_tables.sql` in SSMS and run it. The script creates the `MyGateSociety`
+   database when needed, then creates these tables:
+
+   - `units`
+   - `residents`
+   - `gates`
+   - `security_guards`
+   - `visitors`
+   - `visit_invitations`
+   - `visit_logs`
+   - `deliveries`
+   - `complaints`
+
+   After running the script manually, you can set `AUTO_CREATE_TABLES=false` if you want the API to
+   skip schema creation on startup.
 
 ## Common API flow
 
