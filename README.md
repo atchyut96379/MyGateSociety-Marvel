@@ -139,6 +139,8 @@ SSMS is the client application. The API connects to the same SQL Server server n
 that you use on the SSMS login screen.
 
 1. Open SSMS and note the **Server name** and **Authentication** values.
+   The SQL Server edition name, such as Developer or Express, does not decide the connection string.
+   The important value is the server or instance name shown in SSMS.
 2. Create the application database if it does not exist:
 
    ```sql
@@ -147,6 +149,25 @@ that you use on the SSMS login screen.
 
 3. Make sure Microsoft ODBC Driver 18 for SQL Server is installed on Windows. If you have Driver 17
    instead, set `DB_DRIVER=ODBC Driver 17 for SQL Server` in `.env`.
+
+To confirm exactly what SQL Server you connected to in SSMS, run:
+
+```sql
+SELECT
+    @@SERVERNAME AS server_name,
+    SERVERPROPERTY('InstanceName') AS instance_name,
+    SERVERPROPERTY('Edition') AS edition,
+    SERVERPROPERTY('ProductVersion') AS product_version;
+```
+
+Use the result like this:
+
+- If `instance_name` is `NULL`, it is a default instance. Use `DB_HOST=localhost` and `DB_PORT=1433`
+  only if TCP/IP is enabled on port 1433.
+- If `instance_name` is `SQLEXPRESS` or another value, use `DB_HOST=localhost` and
+  `DB_INSTANCE=<that instance_name>`.
+- If SSMS connects with a server name like `(localdb)\MSSQLLocalDB`, use `DB_HOST=(localdb)` and
+  `DB_INSTANCE=MSSQLLocalDB`.
 
 For a normal local default instance with SQL Server Authentication:
 
@@ -237,6 +258,9 @@ Common fixes:
 - Use the same server name that works in SSMS:
   - SSMS `localhost` or `.`: use `DB_HOST=localhost` and `DB_PORT=1433`.
   - SSMS `localhost\SQLEXPRESS` or `.\SQLEXPRESS`: use `DB_HOST=localhost` and `DB_INSTANCE=SQLEXPRESS`.
+  - SSMS `(localdb)\MSSQLLocalDB`: use `DB_HOST=(localdb)` and `DB_INSTANCE=MSSQLLocalDB`.
+- If you do not know the instance name, run the `SERVERPROPERTY('InstanceName')` query in SSMS from
+  the setup section above.
 - Confirm the installed ODBC driver:
 
   ```cmd
