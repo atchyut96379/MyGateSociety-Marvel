@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MyGate Society</title>
+    <link rel="stylesheet" href="/ui/styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Society operations</p>
+        <h1>MyGate Society</h1>
+        <p class="hero-copy">Manage flats, residents, visitors, deliveries, and complaints from one simple dashboard.</p>
+      </div>
+      <div class="hero-actions">
+        <button id="refresh-all" class="primary">Refresh data</button>
+        <a class="secondary" href="/docs" target="_blank" rel="noreferrer">Open API docs</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="status-grid" aria-label="Dashboard totals">
+        <article class="stat-card">
+          <span>Units</span>
+          <strong id="unit-count">0</strong>
+        </article>
+        <article class="stat-card">
+          <span>Residents</span>
+          <strong id="resident-count">0</strong>
+        </article>
+        <article class="stat-card">
+          <span>Active visits</span>
+          <strong id="active-visit-count">0</strong>
+        </article>
+        <article class="stat-card">
+          <span>Open complaints</span>
+          <strong id="open-complaint-count">0</strong>
+        </article>
+      </section>
+
+      <div id="message" class="message" role="status" aria-live="polite"></div>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Step 1</p>
+            <h2>Society setup</h2>
+          </div>
+          <p>Create the base records needed before visitors can enter.</p>
+        </div>
+        <div class="form-grid">
+          <form id="unit-form" class="card-form">
+            <h3>Create flat/unit</h3>
+            <label>Tower <input name="tower" value="A" required /></label>
+            <label>Flat number <input name="flat_number" value="101" required /></label>
+            <label>Floor <input name="floor" type="number" value="1" /></label>
+            <button type="submit">Create unit</button>
+          </form>
+
+          <form id="resident-form" class="card-form">
+            <h3>Add resident</h3>
+            <label>Unit ID <input name="unit_id" type="number" value="1" required /></label>
+            <label>Name <input name="name" value="Asha Rao" required /></label>
+            <label>Phone <input name="phone" value="+919999000001" required /></label>
+            <label>Email <input name="email" type="email" value="asha@example.com" /></label>
+            <label>Role
+              <select name="role">
+                <option value="owner">Owner</option>
+                <option value="tenant">Tenant</option>
+                <option value="family">Family</option>
+                <option value="member">Member</option>
+              </select>
+            </label>
+            <button type="submit">Add resident</button>
+          </form>
+
+          <form id="gate-form" class="card-form">
+            <h3>Create gate</h3>
+            <label>Gate name <input name="name" value="Main Gate" required /></label>
+            <button type="submit">Create gate</button>
+          </form>
+
+          <form id="guard-form" class="card-form">
+            <h3>Add security guard</h3>
+            <label>Gate ID <input name="gate_id" type="number" value="1" required /></label>
+            <label>Name <input name="name" value="Ramesh" required /></label>
+            <label>Phone <input name="phone" value="+919999000002" required /></label>
+            <label>Employee code <input name="employee_code" value="SEC-001" required /></label>
+            <button type="submit">Add guard</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Step 2</p>
+            <h2>Visitor management</h2>
+          </div>
+          <p>Create invitations, check visitors in, and complete check-out.</p>
+        </div>
+        <div class="form-grid">
+          <form id="invitation-form" class="card-form wide">
+            <h3>Create invitation</h3>
+            <div class="two-col">
+              <label>Unit ID <input name="unit_id" type="number" value="1" required /></label>
+              <label>Resident ID <input name="resident_id" type="number" value="1" required /></label>
+              <label>Visitor name <input name="visitor_name" value="Vikram Shah" required /></label>
+              <label>Visitor phone <input name="visitor_phone" value="+919999000003" required /></label>
+              <label>Visitor type
+                <select name="visitor_type">
+                  <option value="guest">Guest</option>
+                  <option value="cab">Cab</option>
+                  <option value="delivery">Delivery</option>
+                  <option value="service">Service</option>
+                  <option value="staff">Staff</option>
+                </select>
+              </label>
+              <label>Vehicle number <input name="vehicle_number" value="MH12AB1234" /></label>
+              <label>Purpose <input name="purpose" value="Dinner" required /></label>
+              <label>Valid minutes <input name="valid_minutes" type="number" value="60" required /></label>
+            </div>
+            <label>Notes <textarea name="notes">Allowed by resident</textarea></label>
+            <button type="submit">Create invitation</button>
+          </form>
+
+          <form id="checkin-form" class="card-form">
+            <h3>Check in with code</h3>
+            <label>Gate ID <input name="gate_id" type="number" value="1" required /></label>
+            <label>Guard ID <input name="guard_id" type="number" value="1" required /></label>
+            <label>Invitation code <input name="invitation_code" placeholder="MG..." required /></label>
+            <button type="submit">Check in visitor</button>
+          </form>
+
+          <form id="checkout-form" class="card-form">
+            <h3>Check out visitor</h3>
+            <label>Visit ID <input name="visit_id" type="number" required /></label>
+            <label>Guard ID <input name="guard_id" type="number" value="1" required /></label>
+            <button type="submit">Check out visitor</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Step 3</p>
+            <h2>Deliveries and complaints</h2>
+          </div>
+          <p>Track parcels at the gate and resident maintenance issues.</p>
+        </div>
+        <div class="form-grid">
+          <form id="delivery-form" class="card-form">
+            <h3>Create delivery</h3>
+            <label>Unit ID <input name="unit_id" type="number" value="1" required /></label>
+            <label>Resident ID <input name="resident_id" type="number" value="1" /></label>
+            <label>Courier <input name="courier_name" value="Amazon" required /></label>
+            <label>Tracking number <input name="tracking_number" value="AMZ12345" /></label>
+            <label>OTP <input name="otp_code" value="4567" /></label>
+            <button type="submit">Create delivery</button>
+          </form>
+
+          <form id="receive-delivery-form" class="card-form">
+            <h3>Receive delivery</h3>
+            <label>Delivery ID <input name="delivery_id" type="number" required /></label>
+            <label>Resident ID <input name="resident_id" type="number" value="1" required /></label>
+            <label>OTP <input name="otp_code" value="4567" /></label>
+            <button type="submit">Mark received</button>
+          </form>
+
+          <form id="complaint-form" class="card-form">
+            <h3>Create complaint</h3>
+            <label>Unit ID <input name="unit_id" type="number" value="1" required /></label>
+            <label>Resident ID <input name="resident_id" type="number" value="1" required /></label>
+            <label>Title <input name="title" value="Lift not working" required /></label>
+            <label>Category <input name="category" value="maintenance" required /></label>
+            <label>Description <textarea name="description" required>The A tower lift is stuck on the ground floor.</textarea></label>
+            <button type="submit">Create complaint</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Live records</p>
+            <h2>Current data</h2>
+          </div>
+          <p>Use these lists to copy IDs and invitation codes into the forms above.</p>
+        </div>
+        <div class="data-grid">
+          <article><h3>Units</h3><div id="units-list" class="record-list"></div></article>
+          <article><h3>Residents</h3><div id="residents-list" class="record-list"></div></article>
+          <article><h3>Gates</h3><div id="gates-list" class="record-list"></div></article>
+          <article><h3>Guards</h3><div id="guards-list" class="record-list"></div></article>
+          <article><h3>Invitations</h3><div id="invitations-list" class="record-list"></div></article>
+          <article><h3>Visits</h3><div id="visits-list" class="record-list"></div></article>
+          <article><h3>Deliveries</h3><div id="deliveries-list" class="record-list"></div></article>
+          <article><h3>Complaints</h3><div id="complaints-list" class="record-list"></div></article>
+        </div>
+      </section>
+    </main>
+
+    <script src="/ui/app.js"></script>
+  </body>
+</html>

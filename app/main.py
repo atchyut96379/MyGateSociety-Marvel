@@ -1,9 +1,11 @@
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 import logging
+from pathlib import Path
 import secrets
 
 from fastapi import Depends, FastAPI, HTTPException, Query, status
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -37,6 +39,7 @@ from app.schemas import (
 
 
 logger = logging.getLogger(__name__)
+STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 
 def now_utc() -> datetime:
@@ -134,7 +137,7 @@ def create_app(init_database: bool | None = None) -> FastAPI:
 
     @api.get("/", tags=["health"])
     def root() -> dict[str, str]:
-        return {"message": settings.app_name, "docs": "/docs", "health": "/health"}
+        return {"message": settings.app_name, "docs": "/docs", "health": "/health", "ui": "/ui"}
 
     @api.get("/health", tags=["health"])
     def health(db: Session = Depends(get_db)) -> dict[str, str]:
@@ -426,6 +429,7 @@ def create_app(init_database: bool | None = None) -> FastAPI:
         db.refresh(complaint)
         return complaint
 
+    api.mount("/ui", StaticFiles(directory=STATIC_DIR, html=True), name="ui")
     return api
 
 

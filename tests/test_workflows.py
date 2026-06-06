@@ -112,6 +112,16 @@ def test_preapproved_visitor_can_check_in_and_out(client: TestClient):
     assert checkout_response.json()["status"] == "checked_out"
 
 
+def test_ui_is_served(client: TestClient):
+    root_response = client.get("/")
+    assert root_response.status_code == 200
+    assert root_response.json()["ui"] == "/ui"
+
+    ui_response = client.get("/ui/")
+    assert ui_response.status_code == 200
+    assert "MyGate Society" in ui_response.text
+
+
 def test_manual_visitor_requires_resident_decision(client: TestClient):
     ids = bootstrap_society(client)
 

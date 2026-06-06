@@ -56,8 +56,9 @@ A deployable MyGate-style society management API built with Python, FastAPI, SQL
    docker info
    ```
 
-3. Open the API documentation:
+3. Open the web UI or API documentation:
 
+   - Web UI: <http://localhost:8000/ui>
    - Swagger UI: <http://localhost:8000/docs>
    - Health check: <http://localhost:8000/health>
 
@@ -94,6 +95,9 @@ Point the app at SQL Server using either `DATABASE_URL` or the `DB_*` variables 
 ```bash
 uvicorn app.main:app --reload
 ```
+
+Then open the web UI at <http://localhost:8000/ui>. Swagger remains available at
+<http://localhost:8000/docs>.
 
 For a quick local smoke test without SQL Server, use SQLite:
 
