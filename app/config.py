@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     auto_create_tables: bool = True
 
     database_url: str | None = None
+    db_server: str | None = None
     db_host: str = "localhost"
     db_port: int = 1433
     db_instance: str | None = None
@@ -29,9 +30,11 @@ class Settings(BaseSettings):
         if self.database_url:
             return self.database_url
 
-        host = self.db_host
+        host = self.db_server or self.db_host
         port: int | None = self.db_port
-        if self.db_instance:
+        if self.db_server and "\\" in self.db_server:
+            port = None
+        elif self.db_instance:
             host = f"{host}\\{self.db_instance}"
             port = None
 

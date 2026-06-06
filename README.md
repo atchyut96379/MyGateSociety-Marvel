@@ -164,6 +164,8 @@ Use the result like this:
 
 - If `instance_name` is `NULL`, it is a default instance. Use `DB_HOST=localhost` and `DB_PORT=1433`
   only if TCP/IP is enabled on port 1433.
+- Preferred for named instances: set `DB_SERVER` to the exact SSMS server name, for example
+  `DB_SERVER=ATCHYUT2026\ATCHYUT3446`.
 - If `instance_name` is `SQLEXPRESS` or another value, use `DB_HOST=localhost` and
   `DB_INSTANCE=<that instance_name>`.
 - If `server_name` is `ATCHYUT2026\ATCHYUT3446`, split it into `DB_HOST=ATCHYUT2026` and
@@ -196,8 +198,7 @@ DB_PASSWORD="YourSqlPassword"
 For the SSMS result `server_name=ATCHYUT2026\ATCHYUT3446` and `instance_name=ATCHYUT3446`, use:
 
 ```env
-DB_HOST=ATCHYUT2026
-DB_INSTANCE=ATCHYUT3446
+DB_SERVER=ATCHYUT2026\ATCHYUT3446
 DB_NAME=MyGateSociety
 DB_AUTHENTICATION=sql
 DB_USER=sa
@@ -206,6 +207,10 @@ DB_DRIVER=ODBC Driver 18 for SQL Server
 DB_TRUST_SERVER_CERTIFICATE=yes
 AUTO_CREATE_TABLES=false
 ```
+
+If `python scripts\check_db.py` still prints `Host: localhost` and `Port: 1433`, your `.env` is still
+using the default sample values. Update `.env` with `DB_SERVER=ATCHYUT2026\ATCHYUT3446`, save it, and
+run the check again.
 
 For a local named instance like `localhost\SQLEXPRESS` using Windows Authentication:
 
