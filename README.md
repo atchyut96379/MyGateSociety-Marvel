@@ -107,10 +107,27 @@ The web UI starts with one login screen for all roles:
 - Resident demo login: use a resident mobile number already created in the system and any non-empty password
 - Guard demo login: use a guard mobile number already created in the system and any non-empty password
 
-After Admin login, the UI shows an apartment-management dashboard with a dark sidebar, resident/flat
-counts, payment-style summary cards, committee table, visitor/security status, setup records,
-deliveries, and complaints. This is the first UI workflow layer over the API; production-grade
-password reset and role permissions should be added when the authentication workflow is finalized.
+After Admin login, the UI shows an apartment-management dashboard with a dark sidebar and the screens
+from the reference workflow:
+
+- Dashboard with payment-style summary cards and committee table
+- Residents List
+- Add Resident
+- Import Residents from Excel screen shell
+- Maintenance List
+- Expenses List
+- Financial Reports
+- Collection dashboard
+- Activity log
+- My Payments
+- Integrations placeholder for Razorpay/SMS setup
+
+Residents, units, gates, guards, invitations, visits, deliveries, and complaints use the FastAPI
+backend. Maintenance rows, expense entries, cash-payment markings, and activity events are currently
+derived or stored in browser local storage so the UI workflow can be exercised before dedicated
+finance/import tables are added. Production-grade password reset, Excel upload, role permissions,
+payment gateway integration, and persistent finance tables should be added when those workflows are
+finalized.
 
 For a quick local smoke test without SQL Server, use SQLite:
 

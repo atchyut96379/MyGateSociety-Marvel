@@ -14,22 +14,16 @@
 
       <main class="login-card">
         <h2>Login</h2>
-
         <div class="portal-box">
           <strong>Portal address:</strong>
           <span>http://localhost:8000/ui</span>
-          <p>Bookmark this link for admin, resident, and guard access.</p>
+          <p>Bookmark this link for committee, residents, and guards.</p>
         </div>
 
         <form id="login-form">
           <label>
-            Mobile number / Username
-            <input
-              name="identifier"
-              autocomplete="username"
-              placeholder="10-digit mobile (system Admin: Admin)"
-              required
-            />
+            Mobile number
+            <input name="identifier" autocomplete="username" placeholder="10-digit mobile (system Admin: Admin)" required />
           </label>
           <label>
             Password
@@ -39,259 +33,56 @@
         </form>
 
         <div id="login-message" class="login-message" role="alert"></div>
-
         <div class="login-help">
           <p><strong>System administrator:</strong> username <em>Admin</em> / password <em>Admin</em>.</p>
-          <p>
-            <strong>Resident and guards:</strong> use registered mobile number. Temporary password support will be
-            connected when the authentication workflow is added.
-          </p>
-          <p><a href="/docs" target="_blank" rel="noreferrer">API docs</a> are still available for testing.</p>
+          <p><strong>Committee and residents:</strong> use your mobile number and temporary password from admin.</p>
+          <p><a href="/docs" target="_blank" rel="noreferrer">Forgot password?</a> Enter mobile and flat in the API until OTP workflow is added.</p>
         </div>
       </main>
 
       <footer class="login-footer">
-        <a href="#">About</a> · <a href="#">Privacy</a> · <a href="#">Terms</a> · <a href="#">Contact</a>
+        <a href="#">About</a> · <a href="#">Privacy</a> · <a href="#">Terms</a> · <a href="#">Refund</a> · <a href="#">Contact</a>
       </footer>
     </section>
 
     <section id="app-shell" class="app-shell hidden">
       <aside class="sidebar">
         <div class="brand">Apartment Management</div>
-        <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu">☰</button>
-
         <div class="profile">
           <span>Welcome</span>
           <strong id="profile-name">Admin</strong>
           <div class="role-tags">
             <span class="tag tag-admin" id="profile-role">Admin</span>
-            <span class="tag tag-secondary" id="profile-extra">System</span>
+            <span class="tag tag-resident">Resident</span>
+            <span class="tag tag-secondary" id="profile-extra">Secretary</span>
           </div>
         </div>
-
         <button id="logout-button" class="logout-button">Logout</button>
 
         <nav class="nav-list" aria-label="Main navigation">
-          <a class="active" href="#dashboard">☷ Dashboard</a>
-          <a href="#residents">♟ Residents</a>
-          <a href="#maintenance">▣ Maintenance</a>
-          <a href="#expenses">▰ Expenses</a>
-          <a href="#reports">▤ Reports</a>
-          <a href="#collections">▦ Collection dashboard</a>
-          <a href="#activity">↺ Activity log</a>
-          <a href="#integrations">⚑ Integrations</a>
-          <a href="#payments">▱ My Payments</a>
+          <a href="#dashboard" data-route="dashboard">◉ Dashboard</a>
+          <a href="#residents" data-route="residents">♣ Residents</a>
+          <a href="#maintenance" data-route="maintenance">▣ Maintenance</a>
+          <a href="#expenses" data-route="expenses">▰ Expenses</a>
+          <a href="#reports" data-route="reports">▤ Reports</a>
+          <a href="#collections" data-route="collections">▦ Collection dashboard</a>
+          <a href="#activity" data-route="activity">↺ Activity log</a>
+          <a href="#integrations" data-route="integrations">⚑ Integrations (Razorpay / SMS)</a>
+          <a href="#payments" data-route="payments">▱ My Payments</a>
         </nav>
       </aside>
 
       <main class="content">
         <div class="topbar">
-          <button id="collapse-sidebar" class="icon-button" aria-label="Collapse sidebar">☰</button>
-          <div>
-            <strong id="page-title">Dashboard</strong>
-            <span id="connection-state">Connected to API</span>
-          </div>
+          <button id="collapse-sidebar" class="icon-button" aria-label="Menu">☰</button>
+          <span id="connection-state">Connected to API</span>
         </div>
-
-        <section class="notice-card">
-          <h2 id="dashboard-title">Admin Dashboard</h2>
-          <div id="status-banner" class="success-banner">Loading apartment data...</div>
-        </section>
-
-        <section class="toolbar">
-          <button id="refresh-data" class="small-button">Download dashboard report (Excel)</button>
-          <a href="/docs" target="_blank" rel="noreferrer">Open Swagger</a>
-        </section>
-
-        <section class="metric-grid" aria-label="Admin dashboard totals">
-          <article class="metric teal">
-            <strong id="total-residents">0</strong>
-            <span>Total Residents</span>
-            <i>👥</i>
-          </article>
-          <article class="metric green">
-            <strong id="total-flats">0</strong>
-            <span>Total Flats</span>
-            <i>🏢</i>
-          </article>
-          <article class="metric amber">
-            <strong id="owners-count">0</strong>
-            <span>In-house Owners</span>
-            <i>🧑‍💼</i>
-          </article>
-          <article class="metric teal">
-            <strong id="tenants-count">0</strong>
-            <span>In-house Tenants</span>
-            <i>👥</i>
-          </article>
-          <article class="metric red">
-            <strong id="month-collected">₹0.00</strong>
-            <span>This month collected</span>
-            <i>💵</i>
-          </article>
-          <article class="metric gray">
-            <strong id="total-paid">₹0.00</strong>
-            <span>Total collected (paid)</span>
-            <i>🪙</i>
-          </article>
-          <article class="metric red">
-            <strong id="total-expenses">₹0.00</strong>
-            <span>Total Expenses</span>
-            <i>💳</i>
-          </article>
-          <article class="metric blue">
-            <strong id="balance-amount">₹0.00</strong>
-            <span>Balance Amount</span>
-            <i>💳</i>
-          </article>
-          <article class="metric amber compact">
-            <strong id="pending-payments">0</strong>
-            <span>Pending Payments</span>
-            <i>🕘</i>
-            <button id="payment-details">Payment details ⊕</button>
-          </article>
-        </section>
-
-        <section class="admin-grid">
-          <article class="panel" id="residents">
-            <header>
-              <h3>Association committee</h3>
-              <button data-open-form="resident-form-panel">Add resident</button>
-            </header>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Designation</th>
-                    <th>Name</th>
-                    <th>Flat</th>
-                    <th>Phone</th>
-                  </tr>
-                </thead>
-                <tbody id="committee-table"></tbody>
-              </table>
-            </div>
-          </article>
-
-          <article class="panel" id="maintenance">
-            <header>
-              <h3>Visitor and security status</h3>
-              <button data-open-form="invitation-form-panel">New invitation</button>
-            </header>
-            <div id="visits-list" class="stack-list"></div>
-          </article>
-
-          <article class="panel" id="reports">
-            <header>
-              <h3>Units and gates</h3>
-              <button data-open-form="setup-form-panel">Setup records</button>
-            </header>
-            <div id="setup-list" class="stack-list"></div>
-          </article>
-
-          <article class="panel" id="expenses">
-            <header>
-              <h3>Deliveries and complaints</h3>
-              <button data-open-form="service-form-panel">Create service item</button>
-            </header>
-            <div id="service-list" class="stack-list"></div>
-          </article>
-        </section>
+        <div id="page-content"></div>
       </main>
 
       <aside id="form-drawer" class="form-drawer hidden" aria-label="Workflow forms">
         <button id="close-drawer" class="close-button">×</button>
-
-        <section id="setup-form-panel" class="drawer-panel">
-          <h2>Setup records</h2>
-          <form id="unit-form">
-            <h3>Create flat</h3>
-            <label>Tower <input name="tower" value="A" required /></label>
-            <label>Flat number <input name="flat_number" value="101" required /></label>
-            <label>Floor <input name="floor" type="number" value="1" /></label>
-            <button type="submit">Create flat</button>
-          </form>
-          <form id="gate-form">
-            <h3>Create gate</h3>
-            <label>Gate name <input name="name" value="Main Gate" required /></label>
-            <button type="submit">Create gate</button>
-          </form>
-          <form id="guard-form">
-            <h3>Add guard</h3>
-            <label>Gate ID <input name="gate_id" type="number" value="1" required /></label>
-            <label>Name <input name="name" value="Ramesh" required /></label>
-            <label>Phone <input name="phone" value="+919999000002" required /></label>
-            <label>Employee code <input name="employee_code" value="SEC-001" required /></label>
-            <button type="submit">Add guard</button>
-          </form>
-        </section>
-
-        <section id="resident-form-panel" class="drawer-panel hidden">
-          <h2>Residents</h2>
-          <form id="resident-form">
-            <label>Unit ID <input name="unit_id" type="number" value="1" required /></label>
-            <label>Name <input name="name" value="Asha Rao" required /></label>
-            <label>Phone <input name="phone" value="+919999000001" required /></label>
-            <label>Email <input name="email" type="email" value="asha@example.com" /></label>
-            <label>Role
-              <select name="role">
-                <option value="owner">Owner</option>
-                <option value="tenant">Tenant</option>
-                <option value="family">Family</option>
-                <option value="member">Member</option>
-              </select>
-            </label>
-            <button type="submit">Add resident</button>
-          </form>
-        </section>
-
-        <section id="invitation-form-panel" class="drawer-panel hidden">
-          <h2>Visitors</h2>
-          <form id="invitation-form">
-            <h3>Create invitation</h3>
-            <label>Unit ID <input name="unit_id" type="number" value="1" required /></label>
-            <label>Resident ID <input name="resident_id" type="number" value="1" required /></label>
-            <label>Visitor name <input name="visitor_name" value="Vikram Shah" required /></label>
-            <label>Visitor phone <input name="visitor_phone" value="+919999000003" required /></label>
-            <label>Purpose <input name="purpose" value="Dinner" required /></label>
-            <button type="submit">Create invitation</button>
-          </form>
-          <form id="checkin-form">
-            <h3>Check in</h3>
-            <label>Gate ID <input name="gate_id" type="number" value="1" required /></label>
-            <label>Guard ID <input name="guard_id" type="number" value="1" required /></label>
-            <label>Invitation code <input name="invitation_code" placeholder="MG..." required /></label>
-            <button type="submit">Check in</button>
-          </form>
-          <form id="checkout-form">
-            <h3>Check out</h3>
-            <label>Visit ID <input name="visit_id" type="number" required /></label>
-            <label>Guard ID <input name="guard_id" type="number" value="1" required /></label>
-            <button type="submit">Check out</button>
-          </form>
-        </section>
-
-        <section id="service-form-panel" class="drawer-panel hidden">
-          <h2>Services</h2>
-          <form id="delivery-form">
-            <h3>Create delivery</h3>
-            <label>Unit ID <input name="unit_id" type="number" value="1" required /></label>
-            <label>Resident ID <input name="resident_id" type="number" value="1" /></label>
-            <label>Courier <input name="courier_name" value="Amazon" required /></label>
-            <label>Tracking number <input name="tracking_number" value="AMZ12345" /></label>
-            <label>OTP <input name="otp_code" value="4567" /></label>
-            <button type="submit">Create delivery</button>
-          </form>
-          <form id="complaint-form">
-            <h3>Create complaint</h3>
-            <label>Unit ID <input name="unit_id" type="number" value="1" required /></label>
-            <label>Resident ID <input name="resident_id" type="number" value="1" required /></label>
-            <label>Title <input name="title" value="Lift not working" required /></label>
-            <label>Category <input name="category" value="maintenance" required /></label>
-            <label>Description <textarea name="description" required>The A tower lift is stuck.</textarea></label>
-            <button type="submit">Create complaint</button>
-          </form>
-        </section>
+        <div id="drawer-content"></div>
       </aside>
     </section>
 
