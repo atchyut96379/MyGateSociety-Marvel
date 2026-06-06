@@ -1,9 +1,11 @@
 import os
+from io import BytesIO
 
 os.environ["DATABASE_URL"] = "sqlite+pysqlite://"
 os.environ["AUTO_CREATE_TABLES"] = "false"
 
 from fastapi.testclient import TestClient
+from openpyxl import Workbook
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -120,6 +122,45 @@ def test_ui_is_served(client: TestClient):
     ui_response = client.get("/ui/")
     assert ui_response.status_code == 200
     assert "Apartment Management" in ui_response.text
+
+
+def test_residents_can_be_imported_from_excel(client: TestClient):
+    workbook = Workbook()
+    sheet = workbook.active
+    sheet.title = "Residents"
+    sheet.append(["FlatNumber", "ResidentName", "Phone", "NotificationEmail", "ResidentType", "PropertyOwnerName"])
+    sheet.append(["201", "Imported Owner", "+919999100001", "owner@example.com", "Owner", ""])
+    sheet.append(["202", "Imported Tenant", "+919999100002", "", "Tenant", "Imported Owner"])
+    output = BytesIO()
+    workbook.save(output)
+
+    template_response = client.get("/api/residents/import/template")
+    assert template_response.status_code == 200
+    assert template_response.headers["content-type"].startswith(
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+    import_response = client.post(
+        "/api/residents/import?default_tower=B",
+        files={
+            "file": (
+                "residents.xlsx",
+                output.getvalue(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
+        },
+    )
+
+    assert import_response.status_code == 200
+    summary = import_response.json()
+    assert summary["imported"] == 2
+    assert summary["created_units"] == 2
+    assert summary["skipped"] == 0
+
+    units = client.get("/api/units").json()
+    residents = client.get("/api/residents").json()
+    assert {unit["flat_number"] for unit in units} == {"201", "202"}
+    assert {resident["name"] for resident in residents} == {"Imported Owner", "Imported Tenant"}
 
 
 def test_manual_visitor_requires_resident_decision(client: TestClient):

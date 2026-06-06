@@ -6,8 +6,10 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi",
+    "openpyxl",
     "pydantic-settings",
     "pyodbc",
+    "python-multipart",
     "python-dotenv",
     "sqlalchemy",
     "uvicorn[standard]",

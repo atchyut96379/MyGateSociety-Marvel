@@ -35,6 +35,18 @@ class ResidentRead(ResidentCreate):
     model_config = ConfigDict(from_attributes=True)
 
 
+class ResidentImportError(BaseModel):
+    row: int | None = None
+    message: str
+
+
+class ResidentImportSummary(BaseModel):
+    imported: int
+    skipped: int
+    created_units: int
+    errors: list[ResidentImportError]
+
+
 class GateCreate(BaseModel):
     name: str = Field(min_length=1, max_length=80)
 

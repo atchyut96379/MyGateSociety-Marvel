@@ -384,11 +384,12 @@ function renderImportResidents() {
       <p><strong>Important:</strong> keep residents on one sheet. Duplicate checks use flat + name + type.</p>
     </section>
     <section class="toolbar">
-      <button class="small-button light">Download template (both sheets)</button>
+      <button class="small-button light" data-download-template>Download template (both sheets)</button>
       <a href="#residents">Back to list</a>
     </section>
     <form id="import-form" class="full-form compact-form">
-      <label>Excel file (.xlsx) <input name="file" type="file" accept=".xlsx,.xls" /></label>
+      <label>Default tower <input name="default_tower" value="A" required /></label>
+      <label>Excel file (.xlsx) <input name="file" type="file" accept=".xlsx,.xlsm" /></label>
       <button class="primary-action" type="submit">Import</button>
     </form>
   `;
@@ -664,10 +665,43 @@ function attachPageHandlers() {
   }
   const importForm = pageContent.querySelector("#import-form");
   if (importForm) {
-    importForm.addEventListener("submit", (event) => {
+    importForm.addEventListener("submit", async (event) => {
       event.preventDefault();
-      addActivity("ResidentsImportQueued", "-", "Import screen submitted. Backend Excel import will be connected next.");
-      alert("Import UI captured. Backend Excel upload will be implemented in the next workflow step.");
+      const data = new FormData(importForm);
+      const file = data.get("file");
+      if (!file || !file.name) {
+        alert("Please choose an Excel file first.");
+        return;
+      }
+      const defaultTower = encodeURIComponent(data.get("default_tower") || "A");
+      try {
+        const response = await fetch(`/api/residents/import?default_tower=${defaultTower}`, {
+          method: "POST",
+          body: data,
+        });
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.detail || "Import failed.");
+        }
+        addActivity(
+          "ResidentsImported",
+          "-",
+          `Imported ${result.imported}, skipped ${result.skipped}, created flats ${result.created_units}.`,
+        );
+        await loadData();
+        alert(
+          `Import complete.\nImported: ${result.imported}\nSkipped: ${result.skipped}\nCreated flats: ${result.created_units}`,
+        );
+        setRoute("residents");
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+  }
+  const templateButton = pageContent.querySelector("[data-download-template]");
+  if (templateButton) {
+    templateButton.addEventListener("click", () => {
+      window.location.href = "/api/residents/import/template";
     });
   }
 }

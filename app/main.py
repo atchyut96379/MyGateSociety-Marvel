@@ -1,10 +1,12 @@
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
+from io import BytesIO
 import logging
 from pathlib import Path
 import secrets
 
-from fastapi import Depends, FastAPI, HTTPException, Query, status
+from fastapi import Depends, FastAPI, File, HTTPException, Query, UploadFile, status
+from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
@@ -13,6 +15,7 @@ from sqlalchemy.orm import Session
 from app.config import get_settings
 from app.database import get_db, init_db
 from app.models import Complaint, Delivery, Gate, Resident, SecurityGuard, Unit, VisitInvitation, VisitLog, Visitor
+from app.resident_import import build_resident_import_template, parse_resident_workbook
 from app.schemas import (
     CheckInRequest,
     CheckoutRequest,
@@ -29,6 +32,8 @@ from app.schemas import (
     InvitationCreate,
     InvitationRead,
     ResidentCreate,
+    ResidentImportError,
+    ResidentImportSummary,
     ResidentRead,
     UnitCreate,
     UnitRead,
@@ -80,6 +85,19 @@ def get_active_gate_and_guard(db: Session, gate_id: int, guard_id: int) -> tuple
 def assert_resident_belongs_to_unit(resident: Resident, unit_id: int) -> None:
     if resident.unit_id != unit_id:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Resident does not belong to this unit.")
+
+
+def import_error(message: str) -> ResidentImportError:
+    row = None
+    detail = message
+    if message.startswith("Row ") and ":" in message:
+        row_text, detail = message.split(":", 1)
+        try:
+            row = int(row_text.replace("Row", "").strip())
+        except ValueError:
+            row = None
+        detail = detail.strip()
+    return ResidentImportError(row=row, message=detail)
 
 
 def get_or_create_visitor(db: Session, payload: VisitorCreate) -> Visitor:
@@ -175,6 +193,94 @@ def create_app(init_database: bool | None = None) -> FastAPI:
         if unit_id is not None:
             query = query.filter(Resident.unit_id == unit_id)
         return query.order_by(Resident.name).all()
+
+    @api.get("/api/residents/import/template", tags=["residents"])
+    def download_resident_import_template() -> StreamingResponse:
+        content = build_resident_import_template()
+        headers = {"Content-Disposition": 'attachment; filename="resident-import-template.xlsx"'}
+        return StreamingResponse(
+            BytesIO(content),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers=headers,
+        )
+
+    @api.post("/api/residents/import", response_model=ResidentImportSummary, tags=["residents"])
+    async def import_residents(
+        file: UploadFile = File(...),
+        default_tower: str = Query(default="A", min_length=1, max_length=50),
+        db: Session = Depends(get_db),
+    ) -> ResidentImportSummary:
+        filename = file.filename or ""
+        if not filename.lower().endswith((".xlsx", ".xlsm")):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Upload a .xlsx file.")
+
+        content = await file.read()
+        try:
+            imported_rows, parse_errors = parse_resident_workbook(content, default_tower=default_tower)
+        except Exception as exc:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Could not read Excel file: {exc}") from exc
+
+        errors = [import_error(error) for error in parse_errors]
+        skipped = len(errors)
+        imported = 0
+        created_units = 0
+
+        try:
+            for row in imported_rows:
+                unit = (
+                    db.query(Unit)
+                    .filter(Unit.tower == row.tower, Unit.flat_number == row.flat_number)
+                    .first()
+                )
+                if unit is None:
+                    unit = Unit(tower=row.tower, flat_number=row.flat_number)
+                    db.add(unit)
+                    db.flush()
+                    created_units += 1
+
+                duplicate = db.query(Resident).filter(Resident.phone == row.phone).first()
+                if duplicate is not None:
+                    errors.append(
+                        ResidentImportError(
+                            row=row.row_number,
+                            message=f"Skipped duplicate phone {row.phone} for existing resident {duplicate.name}.",
+                        )
+                    )
+                    skipped += 1
+                    continue
+
+                duplicate_name = (
+                    db.query(Resident)
+                    .filter(Resident.unit_id == unit.id, Resident.name == row.name, Resident.role == row.role)
+                    .first()
+                )
+                if duplicate_name is not None:
+                    errors.append(
+                        ResidentImportError(
+                            row=row.row_number,
+                            message=f"Skipped duplicate resident {row.name} in flat {row.flat_number}.",
+                        )
+                    )
+                    skipped += 1
+                    continue
+
+                db.add(
+                    Resident(
+                        unit_id=unit.id,
+                        name=row.name,
+                        phone=row.phone,
+                        email=row.email,
+                        role=row.role,
+                    )
+                )
+                imported += 1
+
+            db.commit()
+        except IntegrityError as exc:
+            db.rollback()
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Import failed because of duplicate data.") from exc
+
+        return ResidentImportSummary(imported=imported, skipped=skipped, created_units=created_units, errors=errors)
 
     @api.post("/api/gates", response_model=GateRead, status_code=status.HTTP_201_CREATED, tags=["security"])
     def create_gate(payload: GateCreate, db: Session = Depends(get_db)) -> Gate:

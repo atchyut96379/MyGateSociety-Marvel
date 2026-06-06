@@ -113,7 +113,7 @@ from the reference workflow:
 - Dashboard with payment-style summary cards and committee table
 - Residents List
 - Add Resident
-- Import Residents from Excel screen shell
+- Import Residents from Excel with backend `.xlsx` upload
 - Maintenance List
 - Expenses List
 - Financial Reports
@@ -123,11 +123,17 @@ from the reference workflow:
 - Integrations placeholder for Razorpay/SMS setup
 
 Residents, units, gates, guards, invitations, visits, deliveries, and complaints use the FastAPI
-backend. Maintenance rows, expense entries, cash-payment markings, and activity events are currently
-derived or stored in browser local storage so the UI workflow can be exercised before dedicated
-finance/import tables are added. Production-grade password reset, Excel upload, role permissions,
-payment gateway integration, and persistent finance tables should be added when those workflows are
-finalized.
+backend. Excel resident import creates missing flats and residents from `.xlsx` files, skips duplicate
+resident rows, and returns a row-level summary. Maintenance rows, expense entries, cash-payment
+markings, and activity events are currently derived or stored in browser local storage so the UI
+workflow can be exercised before dedicated finance tables are added. Production-grade password reset,
+role permissions, payment gateway integration, and persistent finance tables should be added when
+those workflows are finalized.
+
+Resident import endpoints:
+
+- `GET /api/residents/import/template` downloads the supported Excel template.
+- `POST /api/residents/import?default_tower=A` uploads a `.xlsx` file and imports residents.
 
 For a quick local smoke test without SQL Server, use SQLite:
 
